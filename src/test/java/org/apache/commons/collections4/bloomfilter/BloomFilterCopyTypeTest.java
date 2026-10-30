@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /** Tests the compile-time contract of {@link BloomFilter#copy()}. */
-public class BloomFilterCopyTypeTest {
+class BloomFilterCopyTypeTest {
 
     @TempDir
     Path outputDirectory;
@@ -64,7 +64,7 @@ public class BloomFilterCopyTypeTest {
     }
 
     @Test
-    public void testConcreteCopiesCompile() throws IOException {
+    void testConcreteCopiesCompile() throws IOException {
         assertCompiles(true,
                 "SimpleBloomFilter simple = new SimpleBloomFilter(shape).copy();"
                 + "SparseBloomFilter sparse = new SparseBloomFilter(shape).copy();"
@@ -83,18 +83,18 @@ public class BloomFilterCopyTypeTest {
     }
 
     @Test
-    public void testWrongConcreteCopyDoesNotCompile() throws IOException {
+    void testWrongConcreteCopyDoesNotCompile() throws IOException {
         assertCompiles(false, "SparseBloomFilter filter = new SimpleBloomFilter(shape).copy();");
     }
 
     @Test
-    public void testWrongInterfaceCopyDoesNotCompile() throws IOException {
+    void testWrongInterfaceCopyDoesNotCompile() throws IOException {
         assertCompiles(false, "BloomFilter<SimpleBloomFilter> filter = new SimpleBloomFilter(shape);"
                 + "SparseBloomFilter copy = filter.copy();");
     }
 
     @Test
-    public void testWrongCountingCopyDoesNotCompile() throws IOException {
+    void testWrongCountingCopyDoesNotCompile() throws IOException {
         assertCompiles(false, "CountingBloomFilter<ArrayCountingBloomFilter> filter = new ArrayCountingBloomFilter(shape);"
                 + "SimpleBloomFilter copy = filter.copy();");
     }
