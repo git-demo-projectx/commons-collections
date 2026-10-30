@@ -56,7 +56,7 @@ public class BloomFilterCopyTypeTest {
         "CountingBloomFilter<ArrayCountingBloomFilter> filter = new ArrayCountingBloomFilter(shape); SimpleBloomFilter copy = filter.copy(); | false",
         "LayeredBloomFilter<SimpleBloomFilter> filter = LayeredBloomFilterTest.fixed(shape, 2); LayeredBloomFilter<SparseBloomFilter> copy = filter.copy(); | false"
     })
-    public void testCopyAssignment(final String statement, final boolean expected) throws IOException {
+    void testCopyAssignment(final String statement, final boolean expected) throws IOException {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         assertNotNull(compiler, "These tests require a JDK");
         final String source = "package org.apache.commons.collections4.bloomfilter; "
