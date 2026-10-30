@@ -107,7 +107,7 @@ public final class ArrayCountingBloomFilter implements CountingBloomFilter<Array
     @Override
     public boolean add(final CellExtractor other) {
         Objects.requireNonNull(other, "other");
-        other.processCells((index, count) -> add(index, count));
+        other.processCells(this::add);
         return isValid();
     }
 
@@ -260,7 +260,7 @@ public final class ArrayCountingBloomFilter implements CountingBloomFilter<Array
     @Override
     public boolean subtract(final CellExtractor other) {
         Objects.requireNonNull(other, "other");
-        other.processCells((index, count) -> subtract(index, count));
+        other.processCells(this::subtract);
         return isValid();
     }
 

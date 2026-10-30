@@ -137,7 +137,7 @@ public final class SparseBloomFilter implements BloomFilter<SparseBloomFilter> {
     @Override
     public boolean merge(final IndexExtractor indexExtractor) {
         Objects.requireNonNull(indexExtractor, "indexExtractor");
-        indexExtractor.processIndices(index -> add(index));
+        indexExtractor.processIndices(this::add);
         if (!indices.isEmpty()) {
             if (indices.last() >= shape.getNumberOfBits()) {
                 throw new IllegalArgumentException(String.format("Value in list %s is greater than maximum value (%s)",

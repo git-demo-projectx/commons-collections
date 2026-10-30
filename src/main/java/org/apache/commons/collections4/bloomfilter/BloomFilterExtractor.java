@@ -53,7 +53,7 @@ public interface BloomFilterExtractor {
              * filters.
              */
             @Override
-            public BloomFilter<?>[] asBloomFilterArray() {
+            public BloomFilter[] asBloomFilterArray() {
                 return filters.clone();
             }
 
@@ -88,7 +88,7 @@ public interface BloomFilterExtractor {
      *
      * @return An array of Bloom filters.
      */
-    default BloomFilter<?>[] asBloomFilterArray() {
+    default BloomFilter[] asBloomFilterArray() {
         final List<BloomFilter<?>> filters = new ArrayList<>();
         processBloomFilters(f -> filters.add(f.copy()));
         return filters.toArray(new BloomFilter<?>[0]);
@@ -101,8 +101,8 @@ public interface BloomFilterExtractor {
      * @return the merged bloom filter, never null.
      * @throws NullPointerException if this call did not process any filters.
      */
-    default BloomFilter<?> flatten() {
-        final AtomicReference<BloomFilter<?>> ref = new AtomicReference<>();
+    default SimpleBloomFilter flatten() {
+        final AtomicReference<SimpleBloomFilter> ref = new AtomicReference<>();
         processBloomFilters(x -> {
             if (ref.get() == null) {
                 ref.set(new SimpleBloomFilter(x.getShape()));
