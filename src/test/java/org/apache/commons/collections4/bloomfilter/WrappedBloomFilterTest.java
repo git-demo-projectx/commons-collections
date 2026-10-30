@@ -17,11 +17,13 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
+class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
 
     static class Fixture extends WrappedBloomFilter<Fixture> {
 
@@ -41,9 +43,17 @@ public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloom
         return new Fixture(new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape));
     }
 
+    @Test
+    void testGetWrapped() {
+        final SimpleBloomFilter simple = new SimpleBloomFilter(getTestShape());
+        final SparseBloomFilter sparse = new SparseBloomFilter(getTestShape());
+        assertSame(simple, new Fixture(simple).getWrapped());
+        assertSame(sparse, new Fixture(sparse).getWrapped());
+    }
+
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 34})
-    public void testCharacteristics(final int characteristics) {
+    void testCharacteristics(final int characteristics) {
         final Shape shape = getTestShape();
         final BloomFilter<?> inner = new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape) {
             @Override

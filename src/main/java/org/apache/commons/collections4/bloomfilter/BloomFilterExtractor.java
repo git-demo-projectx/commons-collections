@@ -88,7 +88,7 @@ public interface BloomFilterExtractor {
      *
      * @return An array of Bloom filters.
      */
-    default BloomFilter<?>[] asBloomFilterArray() {
+    default BloomFilter[] asBloomFilterArray() {
         final List<BloomFilter<?>> filters = new ArrayList<>();
         processBloomFilters(f -> filters.add(f.copy()));
         return filters.toArray(new BloomFilter<?>[0]);
@@ -101,7 +101,7 @@ public interface BloomFilterExtractor {
      * @return the merged bloom filter, never null.
      * @throws NullPointerException if this call did not process any filters.
      */
-    default BloomFilter<?> flatten() {
+    default BloomFilter flatten() {
         final AtomicReference<BloomFilter<?>> ref = new AtomicReference<>();
         processBloomFilters(x -> {
             if (ref.get() == null) {
