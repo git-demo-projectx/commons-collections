@@ -16,6 +16,11 @@
  */
 package org.apache.commons.collections4.bloomfilter;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+import org.junit.jupiter.api.Test;
+
 public class DefaultBloomFilterExtractorTest extends AbstractBloomFilterExtractorTest {
 
     @Override
@@ -28,5 +33,14 @@ public class DefaultBloomFilterExtractorTest extends AbstractBloomFilterExtracto
             }
             return true;
         };
+    }
+
+    @Test
+    void testAsBloomFilterArrayCopies() {
+        final SimpleBloomFilter original = new SimpleBloomFilter(getTestShape());
+        final SimpleBloomFilter[] result = createUnderTest(original).asBloomFilterArray(new SimpleBloomFilter[0]);
+        assertNotSame(original, result[0]);
+        result[0].merge(IndexExtractor.fromIndexArray(1));
+        assertFalse(original.contains(result[0]));
     }
 }

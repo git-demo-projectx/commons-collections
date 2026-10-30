@@ -80,7 +80,7 @@ public class LayeredBloomFilterTest extends AbstractBloomFilterTest<LayeredBloom
         }
     }
 
-    static class NumberedBloomFilter extends WrappedBloomFilter<NumberedBloomFilter> {
+    static class NumberedBloomFilter extends WrappedBloomFilter<NumberedBloomFilter, SimpleBloomFilter> {
         int value;
         int sequence;
         NumberedBloomFilter(final Shape shape, final int value, final int sequence) {
@@ -98,7 +98,7 @@ public class LayeredBloomFilterTest extends AbstractBloomFilterTest<LayeredBloom
     /**
      * A Bloom filter implementation that tracks the creation time.
      */
-    public static class TimestampedBloomFilter extends WrappedBloomFilter<TimestampedBloomFilter> {
+    public static class TimestampedBloomFilter extends WrappedBloomFilter<TimestampedBloomFilter, BloomFilter<?>> {
 
         private final Instant timestamp;
 

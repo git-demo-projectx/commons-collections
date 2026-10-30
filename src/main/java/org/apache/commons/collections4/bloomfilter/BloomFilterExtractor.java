@@ -17,6 +17,7 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,7 +36,7 @@ public interface BloomFilterExtractor {
      * Creates a BloomFilterExtractor from an array of Bloom filters.
      *
      * <ul>
-     * <li>The asBloomFilterArray() method returns a copy of the original array
+     * <li>The asBloomFilterArray(T[]) method returns a copy of the original array
      * with references to the original filters.</li>
      * <li>The forEachBloomFilterPair() method uses references to the original filters.</li>
      * </ul>
@@ -53,8 +54,8 @@ public interface BloomFilterExtractor {
              * filters.
              */
             @Override
-            public BloomFilter<?>[] asBloomFilterArray() {
-                return filters.clone();
+            public <T> T[] asBloomFilterArray(final T[] array) {
+                return Arrays.asList(filters).toArray(array);
             }
 
             /**
@@ -86,12 +87,18 @@ public interface BloomFilterExtractor {
      * or references to the filters in the collection.</em></p>
      * <p>The default method returns a deep copy of the enclosed filters.</p>
      *
-     * @return An array of Bloom filters.
+     * @param <T> the component type of the destination array.
+     * @param array the destination array, or an array whose component type is used
+     *              to create a new array if it is too small.
+     * @return An array of Bloom filters. If the supplied array is larger than the
+     *         collection, the element immediately following the filters is set to null.
+     * @throws ArrayStoreException if a filter is not assignable to the array's component type.
+     * @throws NullPointerException if the array is null.
      */
-    default BloomFilter<?>[] asBloomFilterArray() {
+    default <T> T[] asBloomFilterArray(final T[] array) {
         final List<BloomFilter<?>> filters = new ArrayList<>();
         processBloomFilters(f -> filters.add(f.copy()));
-        return filters.toArray(new BloomFilter<?>[0]);
+        return filters.toArray(array);
     }
 
     /**
@@ -130,7 +137,7 @@ public interface BloomFilterExtractor {
      */
     default boolean processBloomFilterPair(final BloomFilterExtractor other,
                                            final BiPredicate<BloomFilter<?>, BloomFilter<?>> func) {
-        final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(asBloomFilterArray(), func);
+        final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(asBloomFilterArray(new BloomFilter<?>[0]), func);
         return other.processBloomFilters(p) && p.processRemaining();
     }
 

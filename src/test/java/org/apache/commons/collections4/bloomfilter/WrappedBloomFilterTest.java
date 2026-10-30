@@ -17,13 +17,15 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
 
-    static class Fixture extends WrappedBloomFilter<Fixture> {
+    static class Fixture extends WrappedBloomFilter<Fixture, BloomFilter<?>> {
 
         Fixture(final BloomFilter<?> wrapped) {
             super(wrapped);
@@ -36,9 +38,31 @@ class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterT
 
     }
 
+    static class TypedFixture extends WrappedBloomFilter<TypedFixture, SimpleBloomFilter> {
+
+        TypedFixture(final SimpleBloomFilter wrapped) {
+            super(wrapped);
+        }
+
+        @Override
+        public TypedFixture copy() {
+            return new TypedFixture(getWrapped().copy());
+        }
+    }
+
     @Override
     protected Fixture createEmptyFilter(final Shape shape) {
         return new Fixture(new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape));
+    }
+
+    @Test
+    void testGetWrappedTypeAndIdentity() {
+        final SimpleBloomFilter inner = new SimpleBloomFilter(getTestShape());
+        final TypedFixture underTest = new TypedFixture(inner);
+        final SimpleBloomFilter wrapped = underTest.getWrapped();
+        assertSame(inner, wrapped);
+        wrapped.merge(IndexExtractor.fromIndexArray(1));
+        assertEquals(1, underTest.cardinality());
     }
 
     @ParameterizedTest
