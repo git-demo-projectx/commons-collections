@@ -46,7 +46,7 @@ class BloomFilterCopyTypeTest {
         "CountingBloomFilter<ArrayCountingBloomFilter> filter = new ArrayCountingBloomFilter(Shape.fromNP(10000, 0.01)); "
             + "SimpleBloomFilter copy = filter.copy();",
         "BloomFilter<LayeredBloomFilter<SimpleBloomFilter>> filter = null; SimpleBloomFilter copy = filter.copy();",
-        "WrappedBloomFilter<?> filter = null; SimpleBloomFilter copy = filter.copy();"
+        "WrappedBloomFilter<?, ?> filter = null; SimpleBloomFilter copy = filter.copy();"
     })
     void testIncompatibleCopyDoesNotCompile(final String statement) throws IOException {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

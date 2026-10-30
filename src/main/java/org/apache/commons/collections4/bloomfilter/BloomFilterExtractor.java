@@ -17,10 +17,12 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 
 /**
@@ -35,7 +37,7 @@ public interface BloomFilterExtractor {
      * Creates a BloomFilterExtractor from an array of Bloom filters.
      *
      * <ul>
-     * <li>The asBloomFilterArray() method returns a copy of the original array
+     * <li>The asBloomFilterArray(IntFunction) method returns a copy of the original array
      * with references to the original filters.</li>
      * <li>The forEachBloomFilterPair() method uses references to the original filters.</li>
      * </ul>
@@ -53,8 +55,8 @@ public interface BloomFilterExtractor {
              * filters.
              */
             @Override
-            public BloomFilter<?>[] asBloomFilterArray() {
-                return filters.clone();
+            public <T> T[] asBloomFilterArray(final IntFunction<T[]> arrayFactory) {
+                return Arrays.asList(filters).toArray(arrayFactory.apply(filters.length));
             }
 
             /**
@@ -86,12 +88,15 @@ public interface BloomFilterExtractor {
      * or references to the filters in the collection.</em></p>
      * <p>The default method returns a deep copy of the enclosed filters.</p>
      *
+     * @param <T> the array component type.
+     * @param arrayFactory creates an array of the requested size and component type.
      * @return An array of Bloom filters.
+     * @throws ArrayStoreException if a filter is not assignable to the array component type.
      */
-    default BloomFilter<?>[] asBloomFilterArray() {
+    default <T> T[] asBloomFilterArray(final IntFunction<T[]> arrayFactory) {
         final List<BloomFilter<?>> filters = new ArrayList<>();
         processBloomFilters(f -> filters.add(f.copy()));
-        return filters.toArray(new BloomFilter<?>[0]);
+        return filters.toArray(arrayFactory.apply(filters.size()));
     }
 
     /**
@@ -101,8 +106,8 @@ public interface BloomFilterExtractor {
      * @return the merged bloom filter, never null.
      * @throws NullPointerException if this call did not process any filters.
      */
-    default BloomFilter<?> flatten() {
-        final AtomicReference<BloomFilter<?>> ref = new AtomicReference<>();
+    default SimpleBloomFilter flatten() {
+        final AtomicReference<SimpleBloomFilter> ref = new AtomicReference<>();
         processBloomFilters(x -> {
             if (ref.get() == null) {
                 ref.set(new SimpleBloomFilter(x.getShape()));
@@ -130,7 +135,7 @@ public interface BloomFilterExtractor {
      */
     default boolean processBloomFilterPair(final BloomFilterExtractor other,
                                            final BiPredicate<BloomFilter<?>, BloomFilter<?>> func) {
-        final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(asBloomFilterArray(), func);
+        final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(asBloomFilterArray(BloomFilter<?>[]::new), func);
         return other.processBloomFilters(p) && p.processRemaining();
     }
 
