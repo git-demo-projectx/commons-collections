@@ -53,7 +53,7 @@ public interface BloomFilterExtractor {
              * filters.
              */
             @Override
-            public BloomFilter<?>[] asBloomFilterArray() {
+            public BloomFilterBase[] asBloomFilterArray() {
                 return filters.clone();
             }
 
@@ -63,9 +63,9 @@ public interface BloomFilterExtractor {
              */
             @Override
             public boolean processBloomFilterPair(final BloomFilterExtractor other,
-                                                  final BiPredicate<BloomFilter<?>, BloomFilter<?>> func) {
-                final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(filters, func);
-                return other.processBloomFilters(p) && p.processRemaining();
+                                                  final BiPredicate<BloomFilterBase, BloomFilterBase> func) {
+                final CountingPredicate<BloomFilterBase> p = new CountingPredicate<>(filters, func);
+                return other.processBloomFilters(p::test) && p.processRemaining();
             }
 
             @Override
@@ -88,10 +88,10 @@ public interface BloomFilterExtractor {
      *
      * @return An array of Bloom filters.
      */
-    default BloomFilter<?>[] asBloomFilterArray() {
-        final List<BloomFilter<?>> filters = new ArrayList<>();
+    default BloomFilterBase[] asBloomFilterArray() {
+        final List<BloomFilterBase> filters = new ArrayList<>();
         processBloomFilters(f -> filters.add(f.copy()));
-        return filters.toArray(new BloomFilter<?>[0]);
+        return filters.toArray(new BloomFilterBase[0]);
     }
 
     /**
@@ -129,9 +129,9 @@ public interface BloomFilterExtractor {
      *         {@code false} otherwise.
      */
     default boolean processBloomFilterPair(final BloomFilterExtractor other,
-                                           final BiPredicate<BloomFilter<?>, BloomFilter<?>> func) {
-        final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(asBloomFilterArray(), func);
-        return other.processBloomFilters(p) && p.processRemaining();
+                                           final BiPredicate<BloomFilterBase, BloomFilterBase> func) {
+        final CountingPredicate<BloomFilterBase> p = new CountingPredicate<>(asBloomFilterArray(), func);
+        return other.processBloomFilters(p::test) && p.processRemaining();
     }
 
     /**

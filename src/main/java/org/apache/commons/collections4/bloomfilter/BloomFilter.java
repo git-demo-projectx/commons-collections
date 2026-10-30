@@ -28,7 +28,7 @@ import java.util.Objects;
  * @see IndexExtractor
  * @since 4.5.0
  */
-public interface BloomFilter<T extends BloomFilter<T>> extends IndexExtractor, BitMapExtractor {
+public interface BloomFilter<T extends BloomFilter<T>> extends BloomFilterBase {
 
     /**
      * The sparse characteristic used to determine the best method for matching.
@@ -122,6 +122,7 @@ public interface BloomFilter<T extends BloomFilter<T>> extends IndexExtractor, B
      *
      * @return a copy of this BloomFilter of the same type
      */
+    @Override
     T copy();
 
     // update operations

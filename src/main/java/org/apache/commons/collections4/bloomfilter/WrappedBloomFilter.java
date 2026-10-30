@@ -26,14 +26,14 @@ import java.util.function.LongPredicate;
  * @since 4.5.0
  */
 public abstract class WrappedBloomFilter<T extends WrappedBloomFilter<T>> implements BloomFilter<T> {
-    private final BloomFilter<?> wrapped;
+    private final BloomFilterBase wrapped;
 
     /**
      * Wraps a Bloom filter.  The wrapped filter is maintained as a reference
      * not a copy.  Changes in one will be reflected in the other.
      * @param wrapped The Bloom filter.
      */
-    protected WrappedBloomFilter(final BloomFilter<?> wrapped) {
+    protected WrappedBloomFilter(final BloomFilterBase wrapped) {
         this.wrapped = wrapped;
     }
 
@@ -107,7 +107,7 @@ public abstract class WrappedBloomFilter<T extends WrappedBloomFilter<T>> implem
      *
      * @return the wrapped BloomFilter.
      */
-    protected BloomFilter<?> getWrapped() {
+    protected BloomFilterBase getWrapped() {
         return wrapped;
     }
 

@@ -69,8 +69,10 @@ class BloomFilterCopyTest {
         "<T extends WrappedBloomFilter<T>> T copy(T filter) { return filter.copy(); }",
         "<T extends BloomFilter<T>> LayeredBloomFilter<T> copy(LayeredBloomFilter<T> filter) { return filter.copy(); }",
         "SimpleBloomFilter copy(BloomFilterExtractor filters) { return filters.flatten().copy(); }",
+        "BloomFilterBase copy(BloomFilterBase filter) { return filter.copy(); }",
+        "BloomFilterBase[] array(BloomFilterExtractor filters) { return filters.asBloomFilterArray(); }",
         "static class Decorator extends WrappedBloomFilter<Decorator> { "
-                + "Decorator(BloomFilter<?> filter) { super(filter); } "
+                + "Decorator(BloomFilterBase filter) { super(filter); } "
                 + "public Decorator copy() { return new Decorator(getWrapped().copy()); } }"
     })
     void testCopyReturnsFilterType(final String method) throws IOException {
@@ -84,6 +86,7 @@ class BloomFilterCopyTest {
         "SimpleBloomFilter copy(BloomFilter<SparseBloomFilter> filter) { return filter.copy(); }",
         "SimpleBloomFilter copy(CountingBloomFilter<ArrayCountingBloomFilter> filter) { return filter.copy(); }",
         "SimpleBloomFilter copy(BloomFilter<?> filter) { return filter.copy(); }",
+        "SimpleBloomFilter copy(BloomFilterBase filter) { return filter.copy(); }",
         "<T extends WrappedBloomFilter<T>> SimpleBloomFilter copy(T filter) { return filter.copy(); }",
         "<T extends BloomFilter<T>> T copy(LayeredBloomFilter<T> filter) { return filter.copy(); }"
     })

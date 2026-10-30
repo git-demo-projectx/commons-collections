@@ -33,7 +33,7 @@ public abstract class AbstractBloomFilterExtractorTest {
     BloomFilter<?> two = new SimpleBloomFilter(shape);
     int[] nullCount = { 0, 0 };
     int[] equalityCount = { 0 };
-    BiPredicate<BloomFilter<?>, BloomFilter<?>> counter = (x, y) -> {
+    BiPredicate<BloomFilterBase, BloomFilterBase> counter = (x, y) -> {
         if (x == null) {
             nullCount[0]++;
         }
@@ -82,7 +82,7 @@ public abstract class AbstractBloomFilterExtractorTest {
 
     @Test
     public void testAsBloomFilterArray() {
-        final BloomFilter<?>[] result = createUnderTest().asBloomFilterArray();
+        final BloomFilterBase[] result = createUnderTest().asBloomFilterArray();
         assertEquals(2, result.length);
         assertEquals(1, result[0].cardinality());
         assertEquals(2, result[1].cardinality());
