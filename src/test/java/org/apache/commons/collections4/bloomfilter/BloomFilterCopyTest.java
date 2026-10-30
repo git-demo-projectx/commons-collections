@@ -38,10 +38,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class BloomFilterCopyTest {
+class BloomFilterCopyTest {
 
     @Test
-    public void testCopyThroughInterfaces() {
+    void testCopyThroughInterfaces() {
         final Shape shape = Shape.fromNP(10000, 0.01);
         final BloomFilter<SimpleBloomFilter> simple = new SimpleBloomFilter(shape);
         final SimpleBloomFilter simpleCopy = simple.copy();
@@ -71,7 +71,7 @@ public class BloomFilterCopyTest {
         "BloomFilter<SimpleBloomFilter> filter = new SimpleBloomFilter(shape); SparseBloomFilter copy = filter.copy();",
         "CountingBloomFilter<ArrayCountingBloomFilter> filter = new ArrayCountingBloomFilter(shape); SimpleBloomFilter copy = filter.copy();"
     })
-    public void testCopyRejectsUnrelatedType(final String statement) throws IOException {
+    void testCopyRejectsUnrelatedType(final String statement) throws IOException {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         assertNotNull(compiler);
         final String source = "import org.apache.commons.collections4.bloomfilter.*; "
