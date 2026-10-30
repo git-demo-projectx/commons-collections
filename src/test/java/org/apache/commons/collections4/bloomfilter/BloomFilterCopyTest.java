@@ -39,7 +39,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Tests compile-time constraints on Bloom filter copies. */
-public class BloomFilterCopyTest {
+class BloomFilterCopyTest {
 
     @TempDir
     Path output;
@@ -67,7 +67,20 @@ public class BloomFilterCopyTest {
     }
 
     @Test
-    public void testSameTypeCopiesCompile() throws Exception {
+    void testExtractorReturnTypesCompile() throws Exception {
+        assertCompilation(true,
+                "BloomFilterExtractor extractor = BloomFilterExtractor.fromBloomFilterArray("
+                + "new SimpleBloomFilter(shape), new SparseBloomFilter(shape));"
+                + "BloomFilterState[] filters = extractor.asBloomFilterArray();"
+                + "BloomFilterState copy = filters[0].copy();"
+                + "SimpleBloomFilter flattened = extractor.flatten();"
+                + "LayerManager<SimpleBloomFilter> manager = LayerManager.<SimpleBloomFilter>builder()"
+                + ".setSupplier(() -> new SimpleBloomFilter(shape)).get();"
+                + "SimpleBloomFilter layeredFlattened = new LayeredBloomFilter<>(shape, manager).flatten();");
+    }
+
+    @Test
+    void testSameTypeCopiesCompile() throws Exception {
         assertCompilation(true,
                 "BloomFilter<SimpleBloomFilter> simple = new SimpleBloomFilter(shape);"
                 + "SimpleBloomFilter simpleCopy = simple.copy();"
@@ -80,7 +93,7 @@ public class BloomFilterCopyTest {
                 + "BloomFilter<LayeredBloomFilter<SimpleBloomFilter>> layered = new LayeredBloomFilter<>(shape, manager);"
                 + "LayeredBloomFilter<SimpleBloomFilter> layeredCopy = layered.copy();"
                 + "class Wrapper extends WrappedBloomFilter<Wrapper> {"
-                + "Wrapper(BloomFilter<?> filter) { super(filter); }"
+                + "Wrapper(BloomFilterState filter) { super(filter); }"
                 + "public Wrapper copy() { return new Wrapper(getWrapped().copy()); } }"
                 + "WrappedBloomFilter<Wrapper> wrapped = new Wrapper(simple);"
                 + "Wrapper wrappedCopy = wrapped.copy();");
@@ -93,7 +106,7 @@ public class BloomFilterCopyTest {
         "BloomFilter<?> filter = new SimpleBloomFilter(shape); SparseBloomFilter copy = filter.copy();",
         "CountingBloomFilter<ArrayCountingBloomFilter> filter = new ArrayCountingBloomFilter(shape); SimpleBloomFilter copy = filter.copy();"
     })
-    public void testDifferentTypeCopiesDoNotCompile(final String statement) throws Exception {
+    void testDifferentTypeCopiesDoNotCompile(final String statement) throws Exception {
         assertCompilation(false, statement);
     }
 }

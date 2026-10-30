@@ -102,11 +102,11 @@ public class LayeredBloomFilterTest extends AbstractBloomFilterTest<LayeredBloom
 
         private final Instant timestamp;
 
-        TimestampedBloomFilter(final BloomFilter<?> bf) {
+        TimestampedBloomFilter(final BloomFilterState bf) {
             this(bf, Instant.now());
         }
 
-        TimestampedBloomFilter(final BloomFilter<?> bf, final Instant timestamp) {
+        TimestampedBloomFilter(final BloomFilterState bf, final Instant timestamp) {
             super(bf);
             this.timestamp = timestamp;
         }

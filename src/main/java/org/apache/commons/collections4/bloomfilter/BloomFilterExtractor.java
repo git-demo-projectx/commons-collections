@@ -88,7 +88,7 @@ public interface BloomFilterExtractor {
      *
      * @return An array of Bloom filters.
      */
-    default BloomFilter<?>[] asBloomFilterArray() {
+    default BloomFilterState[] asBloomFilterArray() {
         final List<BloomFilter<?>> filters = new ArrayList<>();
         processBloomFilters(f -> filters.add(f.copy()));
         return filters.toArray(new BloomFilter<?>[0]);
@@ -101,8 +101,8 @@ public interface BloomFilterExtractor {
      * @return the merged bloom filter, never null.
      * @throws NullPointerException if this call did not process any filters.
      */
-    default BloomFilter<?> flatten() {
-        final AtomicReference<BloomFilter<?>> ref = new AtomicReference<>();
+    default SimpleBloomFilter flatten() {
+        final AtomicReference<SimpleBloomFilter> ref = new AtomicReference<>();
         processBloomFilters(x -> {
             if (ref.get() == null) {
                 ref.set(new SimpleBloomFilter(x.getShape()));
@@ -130,8 +130,9 @@ public interface BloomFilterExtractor {
      */
     default boolean processBloomFilterPair(final BloomFilterExtractor other,
                                            final BiPredicate<BloomFilter<?>, BloomFilter<?>> func) {
-        final CountingPredicate<BloomFilter<?>> p = new CountingPredicate<>(asBloomFilterArray(), func);
-        return other.processBloomFilters(p) && p.processRemaining();
+        final CountingPredicate<BloomFilterState> p = new CountingPredicate<>(asBloomFilterArray(),
+                (x, y) -> func.test((BloomFilter<?>) x, (BloomFilter<?>) y));
+        return other.processBloomFilters(p::test) && p.processRemaining();
     }
 
     /**
