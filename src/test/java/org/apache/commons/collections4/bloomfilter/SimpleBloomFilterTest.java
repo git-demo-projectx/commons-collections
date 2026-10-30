@@ -17,9 +17,24 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests for the {@link SimpleBloomFilter}.
@@ -29,6 +44,29 @@ public class SimpleBloomFilterTest extends AbstractBloomFilterTest<SimpleBloomFi
     @Override
     protected SimpleBloomFilter createEmptyFilter(final Shape shape) {
         return new SimpleBloomFilter(shape);
+    }
+
+    @Test
+    public void testCopyRejectsWrongType(@TempDir final Path outputDirectory) throws Exception {
+        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        assertNotNull(compiler);
+        final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        final JavaFileObject source = new SimpleJavaFileObject(URI.create("string:///WrongCopy.java"), JavaFileObject.Kind.SOURCE) {
+            @Override
+            public CharSequence getCharContent(final boolean ignoreEncodingErrors) {
+                return "import org.apache.commons.collections4.bloomfilter.*;"
+                        + "class WrongCopy {"
+                        + "SparseBloomFilter filter = new SimpleBloomFilter(Shape.fromNP(10000, 0.01)).copy();"
+                        + "}";
+            }
+        };
+        try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null)) {
+            assertFalse(compiler.getTask(null, fileManager, diagnostics,
+                    Arrays.asList("-proc:none", "-classpath", System.getProperty("java.class.path"),
+                            "-d", outputDirectory.toString()), null, Collections.singletonList(source)).call());
+            assertTrue(diagnostics.getDiagnostics().stream()
+                    .anyMatch(d -> "compiler.err.prob.found.req".equals(d.getCode())));
+        }
     }
 
     @Test

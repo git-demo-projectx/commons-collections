@@ -49,7 +49,7 @@ import java.util.stream.IntStream;
  * @see CellExtractor
  * @since 4.5.0
  */
-public final class ArrayCountingBloomFilter implements CountingBloomFilter {
+public final class ArrayCountingBloomFilter implements CountingBloomFilter<ArrayCountingBloomFilter> {
 
     /**
      * The shape of this Bloom filter.
@@ -107,7 +107,7 @@ public final class ArrayCountingBloomFilter implements CountingBloomFilter {
     @Override
     public boolean add(final CellExtractor other) {
         Objects.requireNonNull(other, "other");
-        other.processCells(this::add);
+        other.processCells((index, count) -> add(index, count));
         return isValid();
     }
 
@@ -260,7 +260,7 @@ public final class ArrayCountingBloomFilter implements CountingBloomFilter {
     @Override
     public boolean subtract(final CellExtractor other) {
         Objects.requireNonNull(other, "other");
-        other.processCells(this::subtract);
+        other.processCells((index, count) -> subtract(index, count));
         return isValid();
     }
 

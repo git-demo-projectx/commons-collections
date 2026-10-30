@@ -26,7 +26,7 @@ import java.util.function.LongPredicate;
  * implementation and should work well for most low cardinality Bloom filters.
  * @since 4.5.0
  */
-public final class SparseBloomFilter implements BloomFilter {
+public final class SparseBloomFilter implements BloomFilter<SparseBloomFilter> {
 
     /**
      * The bitSet that defines this BloomFilter.
@@ -120,7 +120,7 @@ public final class SparseBloomFilter implements BloomFilter {
     }
 
     @Override
-    public boolean merge(final BloomFilter other) {
+    public boolean merge(final BloomFilter<?> other) {
         Objects.requireNonNull(other, "other");
         final IndexExtractor indexExtractor = (other.characteristics() & SPARSE) != 0 ? (IndexExtractor) other : IndexExtractor.fromBitMapExtractor(other);
         merge(indexExtractor);
@@ -137,7 +137,7 @@ public final class SparseBloomFilter implements BloomFilter {
     @Override
     public boolean merge(final IndexExtractor indexExtractor) {
         Objects.requireNonNull(indexExtractor, "indexExtractor");
-        indexExtractor.processIndices(this::add);
+        indexExtractor.processIndices(index -> add(index));
         if (!indices.isEmpty()) {
             if (indices.last() >= shape.getNumberOfBits()) {
                 throw new IllegalArgumentException(String.format("Value in list %s is greater than maximum value (%s)",
