@@ -17,11 +17,15 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
+class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
 
     static class Fixture extends WrappedBloomFilter<Fixture> {
 
@@ -43,7 +47,7 @@ public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloom
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 34})
-    public void testCharacteristics(final int characteristics) {
+    void testCharacteristics(final int characteristics) {
         final Shape shape = getTestShape();
         final BloomFilter<?> inner = new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape) {
             @Override
@@ -53,6 +57,20 @@ public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloom
         };
         final Fixture underTest = new Fixture(inner);
         assertEquals(characteristics, underTest.characteristics());
+    }
+
+    @Test
+    void testWrappedReferenceAndCopy() {
+        final SimpleBloomFilter inner = new SimpleBloomFilter(getTestShape());
+        final Fixture underTest = new Fixture(inner);
+        assertSame(inner, underTest.getWrapped());
+        underTest.merge(IndexExtractor.fromIndexArray(1));
+        assertTrue(inner.contains(IndexExtractor.fromIndexArray(1)));
+
+        final Fixture copy = underTest.copy();
+        assertNotSame(inner, copy.getWrapped());
+        inner.clear();
+        assertTrue(copy.contains(IndexExtractor.fromIndexArray(1)));
     }
 
 }
