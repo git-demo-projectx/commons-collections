@@ -23,11 +23,12 @@ import java.util.Objects;
  * <p>
  * <em>See implementation notes for {@link BitMapExtractor} and {@link IndexExtractor}.</em>
  * </p>
+ * @param <T> the type of filter returned by {@link #copy()}
  * @see BitMapExtractor
  * @see IndexExtractor
  * @since 4.5.0
  */
-public interface BloomFilter extends IndexExtractor, BitMapExtractor {
+public interface BloomFilter<T extends BloomFilter<T>> extends BloomFilterState {
 
     /**
      * The sparse characteristic used to determine the best method for matching.
@@ -45,6 +46,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      *
      * @return the cardinality of this filter
      */
+    @Override
     int cardinality();
 
     // Query Operations
@@ -55,11 +57,13 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * Characteristics are defined as bits within the characteristics integer.
      * @return the characteristics for this bloom filter.
      */
+    @Override
     int characteristics();
 
     /**
      * Resets the filter to its initial, unpopulated state.
      */
+    @Override
     void clear();
 
     /**
@@ -69,6 +73,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @param bitMapExtractor the {@code BitMapExtractor} to provide the bit maps.
      * @return {@code true} if this filter is enabled for all bits specified by the bit maps
      */
+    @Override
     default boolean contains(final BitMapExtractor bitMapExtractor) {
         return processBitMapPairs(bitMapExtractor, (x, y) -> (x & y) == y);
     }
@@ -84,7 +89,8 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @param other the other Bloom filter
      * @return true if all enabled bits in the other filter are enabled in this filter.
      */
-    default boolean contains(final BloomFilter other) {
+    @Override
+    default boolean contains(final BloomFilter<?> other) {
         Objects.requireNonNull(other, "other");
         return (characteristics() & SPARSE) != 0 ? contains((IndexExtractor) other) : contains((BitMapExtractor) other);
     }
@@ -99,6 +105,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @param hasher the hasher to provide the indexes
      * @return true if this filter is enabled for all bits specified by the hasher
      */
+    @Override
     default boolean contains(final Hasher hasher) {
         Objects.requireNonNull(hasher, "Hasher");
         final Shape shape = getShape();
@@ -114,15 +121,16 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @param indexExtractor the IndexExtractor to provide the indexes
      * @return {@code true} if this filter is enabled for all bits specified by the IndexExtractor
      */
+    @Override
     boolean contains(IndexExtractor indexExtractor);
 
     /**
      * Creates a new instance of the BloomFilter with the same properties as the current one.
      *
-     * @param <T> Type of BloomFilter.
-     * @return a copy of this BloomFilter
+     * @return a copy of this BloomFilter of the same type
      */
-    <T extends BloomFilter> T copy();
+    @Override
+    T copy();
 
     // update operations
 
@@ -142,7 +150,8 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @see #estimateN()
      * @see Shape
      */
-    default int estimateIntersection(final BloomFilter other) {
+    @Override
+    default int estimateIntersection(final BloomFilter<?> other) {
         Objects.requireNonNull(other, "other");
         final double eThis = getShape().estimateN(cardinality());
         final double eOther = getShape().estimateN(other.cardinality());
@@ -157,7 +166,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
         } else if (Double.isInfinite(eOther)) {
             estimate = Math.round(eThis);
         } else {
-            final BloomFilter union = this.copy();
+            final BloomFilter<?> union = this.copy();
             union.merge(other);
             final double eUnion = getShape().estimateN(union.cardinality());
             if (Double.isInfinite(eUnion)) {
@@ -192,6 +201,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @see Shape#estimateN(int)
      * @see Shape
      */
+    @Override
     default int estimateN() {
         final double d = getShape().estimateN(cardinality());
         if (Double.isInfinite(d)) {
@@ -220,9 +230,10 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @see #estimateN()
      * @see Shape
      */
-    default int estimateUnion(final BloomFilter other) {
+    @Override
+    default int estimateUnion(final BloomFilter<?> other) {
         Objects.requireNonNull(other, "other");
-        final BloomFilter cpy = this.copy();
+        final BloomFilter<?> cpy = this.copy();
         cpy.merge(other);
         return cpy.estimateN();
     }
@@ -231,6 +242,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * Gets the shape that was used when the filter was built.
      * @return The shape the filter was built with.
      */
+    @Override
     Shape getShape();
 
     // Counting Operations
@@ -246,6 +258,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      *
      * @return {@code true} if no bits are enabled, {@code false} otherwise.
      */
+    @Override
     default boolean isEmpty() {
         return processBitMaps(y -> y == 0);
     }
@@ -257,6 +270,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      *
      * @return {@code true} if the filter is full, {@code false} otherwise.
      */
+    @Override
     default boolean isFull() {
         return cardinality() == getShape().getNumberOfBits();
     }
@@ -274,6 +288,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @return true if the merge was successful
      * @throws IllegalArgumentException if bitMapExtractor sends illegal value.
      */
+    @Override
     boolean merge(BitMapExtractor bitMapExtractor);
 
     /**
@@ -290,7 +305,8 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @param other The bloom filter to merge into this one.
      * @return true if the merge was successful
      */
-    default boolean merge(final BloomFilter other) {
+    @Override
+    default boolean merge(final BloomFilter<?> other) {
         return (characteristics() & SPARSE) != 0 ? merge((IndexExtractor) other) : merge((BitMapExtractor) other);
     }
 
@@ -307,6 +323,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @return true if the merge was successful
      * @throws IllegalArgumentException if hasher produces an illegal value.
      */
+    @Override
     default boolean merge(final Hasher hasher) {
         Objects.requireNonNull(hasher, "hasher");
         return merge(hasher.indices(getShape()));
@@ -325,6 +342,7 @@ public interface BloomFilter extends IndexExtractor, BitMapExtractor {
      * @return true if the merge was successful
      * @throws IllegalArgumentException if indexExtractor sends illegal value.
      */
+    @Override
     boolean merge(IndexExtractor indexExtractor);
 
     /**
