@@ -16,6 +16,7 @@
  */
 package org.apache.commons.collections4.bloomfilter;
 
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.LongPredicate;
 
@@ -103,12 +104,14 @@ public abstract class WrappedBloomFilter<T extends WrappedBloomFilter<T>> implem
     }
 
     /**
-     * Gets the wrapped BloomFilter.
+     * Applies a function to the wrapped BloomFilter.
      *
-     * @return the wrapped BloomFilter.
+     * @param <R> the result type.
+     * @param function the function to apply to the wrapped filter reference.
+     * @return the result of the function.
      */
-    protected BloomFilter<?> getWrapped() {
-        return wrapped;
+    protected <R> R getWrapped(final Function<? super BloomFilter<?>, ? extends R> function) {
+        return function.apply(wrapped);
     }
 
     @Override

@@ -17,7 +17,11 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.util.function.Function;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -31,7 +35,7 @@ class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterT
 
         @Override
         public Fixture copy() {
-            return new Fixture(getWrapped().copy());
+            return new Fixture(getWrapped(BloomFilter::copy));
         }
 
     }
@@ -39,6 +43,14 @@ class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterT
     @Override
     protected Fixture createEmptyFilter(final Shape shape) {
         return new Fixture(new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape));
+    }
+
+    @Test
+    void testGetWrapped() {
+        final SimpleBloomFilter inner = new SimpleBloomFilter(getTestShape());
+        final Fixture underTest = new Fixture(inner);
+        assertSame(inner, underTest.getWrapped(Function.identity()));
+        assertEquals(inner.getShape(), underTest.getWrapped(BloomFilter::getShape));
     }
 
     @ParameterizedTest

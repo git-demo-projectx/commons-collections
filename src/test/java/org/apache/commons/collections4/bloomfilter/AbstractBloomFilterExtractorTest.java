@@ -82,7 +82,7 @@ public abstract class AbstractBloomFilterExtractorTest {
 
     @Test
     public void testAsBloomFilterArray() {
-        final BloomFilter<?>[] result = createUnderTest().asBloomFilterArray();
+        final BloomFilter<?>[] result = createUnderTest().asBloomFilterArray(BloomFilter<?>[]::new);
         assertEquals(2, result.length);
         assertEquals(1, result[0].cardinality());
         assertEquals(2, result[1].cardinality());

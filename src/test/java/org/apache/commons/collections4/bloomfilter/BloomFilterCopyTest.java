@@ -74,7 +74,7 @@ class BloomFilterCopyTest {
                 + "LayeredBloomFilter<SimpleBloomFilter> layeredCopy = layered.copy(); "
                 + "class Decorator extends WrappedBloomFilter<Decorator> { "
                 + "Decorator(BloomFilter<?> filter) { super(filter); } "
-                + "public Decorator copy() { return new Decorator(getWrapped().copy()); } } "
+                + "public Decorator copy() { return new Decorator(getWrapped(BloomFilter::copy)); } } "
                 + "WrappedBloomFilter<Decorator> wrapped = new Decorator(simple); Decorator wrappedCopy = wrapped.copy();",
                 diagnostics), () -> diagnostics.getDiagnostics().toString());
     }
