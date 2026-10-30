@@ -51,8 +51,9 @@ public class BloomFilterExtractorTest {
         final SparseBloomFilter sparse = new SparseBloomFilter(Shape.fromKM(2, 72));
         final BloomFilterExtractor extractor = predicate -> predicate.test(sparse);
         assertThrows(ArrayStoreException.class, () -> extractor.asBloomFilterArray(SimpleBloomFilter[]::new));
+        final BloomFilterExtractor arrayExtractor = BloomFilterExtractor.fromBloomFilterArray(sparse);
         assertThrows(ArrayStoreException.class,
-                () -> BloomFilterExtractor.fromBloomFilterArray(sparse).asBloomFilterArray(SimpleBloomFilter[]::new));
+                () -> arrayExtractor.asBloomFilterArray(SimpleBloomFilter[]::new));
     }
 
     @Test
