@@ -22,17 +22,19 @@ import java.util.function.LongPredicate;
 /**
  * An abstract class to assist in implementing Bloom filter decorators.
  *
+ * @param <T> the type of decorator returned by {@link #copy()}
+ * @param <W> the type of the wrapped filter
  * @since 4.5.0
  */
-public abstract class WrappedBloomFilter implements BloomFilter {
-    private final BloomFilter wrapped;
+public abstract class WrappedBloomFilter<T extends BloomFilter<T>, W extends BloomFilter<W>> implements BloomFilter<T> {
+    private final W wrapped;
 
     /**
      * Wraps a Bloom filter.  The wrapped filter is maintained as a reference
      * not a copy.  Changes in one will be reflected in the other.
      * @param wrapped The Bloom filter.
      */
-    public WrappedBloomFilter(final BloomFilter wrapped) {
+    protected WrappedBloomFilter(final W wrapped) {
         this.wrapped = wrapped;
     }
 
@@ -67,7 +69,7 @@ public abstract class WrappedBloomFilter implements BloomFilter {
     }
 
     @Override
-    public boolean contains(final BloomFilter other) {
+    public boolean contains(final BloomFilter<?> other) {
         return wrapped.contains(other);
     }
 
@@ -82,7 +84,7 @@ public abstract class WrappedBloomFilter implements BloomFilter {
     }
 
     @Override
-    public int estimateIntersection(final BloomFilter other) {
+    public int estimateIntersection(final BloomFilter<?> other) {
         return wrapped.estimateIntersection(other);
     }
 
@@ -92,7 +94,7 @@ public abstract class WrappedBloomFilter implements BloomFilter {
     }
 
     @Override
-    public int estimateUnion(final BloomFilter other) {
+    public int estimateUnion(final BloomFilter<?> other) {
         return wrapped.estimateUnion(other);
     }
 
@@ -106,7 +108,7 @@ public abstract class WrappedBloomFilter implements BloomFilter {
      *
      * @return the wrapped BloomFilter.
      */
-    protected BloomFilter getWrapped() {
+    protected W getWrapped() {
         return wrapped;
     }
 
@@ -121,7 +123,7 @@ public abstract class WrappedBloomFilter implements BloomFilter {
     }
 
     @Override
-    public boolean merge(final BloomFilter other) {
+    public boolean merge(final BloomFilter<?> other) {
         return wrapped.merge(other);
     }
 
