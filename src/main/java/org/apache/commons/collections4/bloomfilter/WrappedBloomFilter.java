@@ -33,7 +33,7 @@ public abstract class WrappedBloomFilter<T extends WrappedBloomFilter<T>> implem
      * not a copy.  Changes in one will be reflected in the other.
      * @param wrapped The Bloom filter.
      */
-    public WrappedBloomFilter(final BloomFilter<?> wrapped) {
+    protected WrappedBloomFilter(final BloomFilter<?> wrapped) {
         this.wrapped = wrapped;
     }
 

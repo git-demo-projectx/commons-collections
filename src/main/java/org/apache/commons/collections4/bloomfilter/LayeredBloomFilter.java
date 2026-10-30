@@ -289,8 +289,8 @@ public class LayeredBloomFilter<T extends BloomFilter<T>> implements BloomFilter
      * @return the merged bloom filter.
      */
     @Override
-    public BloomFilter<?> flatten() {
-        final BloomFilter<?> bf = new SimpleBloomFilter(shape);
+    public SimpleBloomFilter flatten() {
+        final SimpleBloomFilter bf = new SimpleBloomFilter(shape);
         processBloomFilters(bf::merge);
         return bf;
     }

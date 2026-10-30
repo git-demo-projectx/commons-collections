@@ -36,11 +36,11 @@ import javax.tools.ToolProvider;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class BloomFilterCopyTest {
+class BloomFilterCopyTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SimpleBloomFilter", "BloomFilter<SimpleBloomFilter>", "BloomFilter<?>"})
-    public void testCopyCannotReturnUnrelatedType(final String type) throws IOException {
+    void testCopyCannotReturnUnrelatedType(final String type) throws IOException {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         assertNotNull(compiler);
         final String source = "import org.apache.commons.collections4.bloomfilter.*; "

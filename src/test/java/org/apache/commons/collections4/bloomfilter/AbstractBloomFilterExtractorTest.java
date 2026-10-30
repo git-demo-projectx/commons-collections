@@ -90,7 +90,7 @@ public abstract class AbstractBloomFilterExtractorTest {
 
     @Test
     public void testFlatten() {
-        final BloomFilter<?> underTest = createUnderTest().flatten();
+        final SimpleBloomFilter underTest = createUnderTest().flatten();
         final BloomFilter<?> expected = new SimpleBloomFilter(shape);
         expected.merge(IndexExtractor.fromIndexArray(1, 2, 3));
         assertArrayEquals(expected.asBitMapArray(), underTest.asBitMapArray());

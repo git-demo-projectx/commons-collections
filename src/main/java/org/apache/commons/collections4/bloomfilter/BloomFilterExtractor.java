@@ -101,8 +101,8 @@ public interface BloomFilterExtractor {
      * @return the merged bloom filter, never null.
      * @throws NullPointerException if this call did not process any filters.
      */
-    default BloomFilter<?> flatten() {
-        final AtomicReference<BloomFilter<?>> ref = new AtomicReference<>();
+    default SimpleBloomFilter flatten() {
+        final AtomicReference<SimpleBloomFilter> ref = new AtomicReference<>();
         processBloomFilters(x -> {
             if (ref.get() == null) {
                 ref.set(new SimpleBloomFilter(x.getShape()));
