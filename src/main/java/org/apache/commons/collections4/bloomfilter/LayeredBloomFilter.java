@@ -62,7 +62,7 @@ import java.util.function.Predicate;
  * @param <T> The type of Bloom Filter that is used for the layers.
  * @since 4.5.0
  */
-public class LayeredBloomFilter<T extends BloomFilter> implements BloomFilter, BloomFilterExtractor {
+public class LayeredBloomFilter<T extends BloomFilter<T>> implements BloomFilter<LayeredBloomFilter<T>>, BloomFilterExtractor {
     /**
      * A class used to locate matching filters across all the layers.
      */
@@ -147,7 +147,7 @@ public class LayeredBloomFilter<T extends BloomFilter> implements BloomFilter, B
      * @return {@code true} if this filter contains the other filter.
      */
     @Override
-    public boolean contains(final BloomFilter other) {
+    public boolean contains(final BloomFilter<?> other) {
         return other instanceof BloomFilterExtractor ? contains((BloomFilterExtractor) other)
                 : !processBloomFilters(x -> !x.contains(other));
     }
@@ -227,7 +227,7 @@ public class LayeredBloomFilter<T extends BloomFilter> implements BloomFilter, B
     }
 
     @Override
-    public int estimateUnion(final BloomFilter other) {
+    public int estimateUnion(final BloomFilter<?> other) {
         Objects.requireNonNull(other, "other");
         final BloomFilter cpy = this.flatten();
         cpy.merge(other);
@@ -332,7 +332,7 @@ public class LayeredBloomFilter<T extends BloomFilter> implements BloomFilter, B
     }
 
     @Override
-    public boolean merge(final BloomFilter bf) {
+    public boolean merge(final BloomFilter<?> bf) {
         return layerManager.getTarget().merge(bf);
     }
 
