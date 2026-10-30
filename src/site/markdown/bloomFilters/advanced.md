@@ -447,7 +447,7 @@ public class LayeredExample {
      * A Bloom filter implementation that has a timestamp indicating when it expires.
      * Used as the Bloom filter for the layer in the LayeredBloomFilter
      */
-    static class TimestampedBloomFilter extends WrappedBloomFilter {
+    static class TimestampedBloomFilter extends WrappedBloomFilter<TimestampedBloomFilter> {
         long expires;
 
         TimestampedBloomFilter(Shape shape, long ttl) {
