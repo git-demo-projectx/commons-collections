@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for the {@link ArrayCountingBloomFilter}.
  */
-public abstract class AbstractCountingBloomFilterTest<T extends CountingBloomFilter>
+public abstract class AbstractCountingBloomFilterTest<T extends CountingBloomFilter<T>>
         extends AbstractBloomFilterTest<T> {
 
     private static final int[] from1Counts = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
@@ -88,9 +88,9 @@ public abstract class AbstractCountingBloomFilterTest<T extends CountingBloomFil
 
     @Test
     public void mergeIncrementsAllCellsTest() {
-        final CountingBloomFilter f1 = createEmptyFilter(Shape.fromKM(1, 10));
-        final CountingBloomFilter f2 = f1.copy();
-        final CountingBloomFilter f3 = f1.copy();
+        final CountingBloomFilter<T> f1 = createEmptyFilter(Shape.fromKM(1, 10));
+        final T f2 = f1.copy();
+        final T f3 = f1.copy();
         // index extractor produces 3 two times.
         final IndexExtractor ip = p -> {
             p.test(3);
