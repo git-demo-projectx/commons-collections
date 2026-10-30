@@ -67,7 +67,11 @@ class BloomFilterCopyTest {
         "<T extends BloomFilter<T>> T copy(T filter) { return filter.copy(); }",
         "<T extends CountingBloomFilter<T>> T copy(T filter) { return filter.copy(); }",
         "<T extends WrappedBloomFilter<T>> T copy(T filter) { return filter.copy(); }",
-        "<T extends BloomFilter<T>> LayeredBloomFilter<T> copy(LayeredBloomFilter<T> filter) { return filter.copy(); }"
+        "<T extends BloomFilter<T>> LayeredBloomFilter<T> copy(LayeredBloomFilter<T> filter) { return filter.copy(); }",
+        "SimpleBloomFilter copy(BloomFilterExtractor filters) { return filters.flatten().copy(); }",
+        "static class Decorator extends WrappedBloomFilter<Decorator> { "
+                + "Decorator(BloomFilter<?> filter) { super(filter); } "
+                + "public Decorator copy() { return new Decorator(getWrapped().copy()); } }"
     })
     void testCopyReturnsFilterType(final String method) throws IOException {
         assertCompiles(method, true);
