@@ -21,23 +21,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilter> {
+public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
 
-    private static class Fixture extends WrappedBloomFilter {
+    static class Fixture extends WrappedBloomFilter<Fixture> {
 
         Fixture(final BloomFilter wrapped) {
             super(wrapped);
         }
 
         @Override
-        public WrappedBloomFilter copy() {
+        public Fixture copy() {
             return new Fixture(getWrapped().copy());
         }
 
     }
 
     @Override
-    protected WrappedBloomFilter createEmptyFilter(final Shape shape) {
+    protected Fixture createEmptyFilter(final Shape shape) {
         return new Fixture(new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape));
     }
 
