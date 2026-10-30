@@ -19,6 +19,9 @@ package org.apache.commons.collections4.bloomfilter;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.BiPredicate;
@@ -29,11 +32,11 @@ import org.junit.jupiter.api.Test;
 public abstract class AbstractBloomFilterExtractorTest {
     private final Shape shape = Shape.fromKM(17, 72);
 
-    BloomFilter one = new SimpleBloomFilter(shape);
-    BloomFilter two = new SimpleBloomFilter(shape);
+    BloomFilter<?> one = new SimpleBloomFilter(shape);
+    BloomFilter<?> two = new SimpleBloomFilter(shape);
     int[] nullCount = { 0, 0 };
     int[] equalityCount = { 0 };
-    BiPredicate<BloomFilter, BloomFilter> counter = (x, y) -> {
+    BiPredicate<BloomFilter<?>, BloomFilter<?>> counter = (x, y) -> {
         if (x == null) {
             nullCount[0]++;
         }
@@ -55,7 +58,7 @@ public abstract class AbstractBloomFilterExtractorTest {
      * @param filters The filters to return.
      * @return A BloomFilterExtractor that returns the filters in order.
      */
-    protected abstract BloomFilterExtractor createUnderTest(BloomFilter... filters);
+    protected abstract BloomFilterExtractor createUnderTest(BloomFilter<?>... filters);
 
     /**
      * The shape of the Bloom filters for testing.
@@ -82,16 +85,40 @@ public abstract class AbstractBloomFilterExtractorTest {
 
     @Test
     public void testAsBloomFilterArray() {
-        final BloomFilter[] result = createUnderTest().asBloomFilterArray();
+        final BloomFilter<?>[] result = createUnderTest().asBloomFilterArray(new BloomFilter<?>[0]);
         assertEquals(2, result.length);
         assertEquals(1, result[0].cardinality());
         assertEquals(2, result[1].cardinality());
     }
 
     @Test
+    public void testAsBloomFilterArrayDestination() {
+        final BloomFilter<?>[] destination = new BloomFilter<?>[3];
+        destination[2] = one;
+        final BloomFilter<?>[] result = createUnderTest().asBloomFilterArray(destination);
+        assertSame(destination, result);
+        assertEquals(1, result[0].cardinality());
+        assertEquals(2, result[1].cardinality());
+        assertNull(result[2]);
+    }
+
+    @Test
+    public void testAsBloomFilterArrayHeterogeneous() {
+        final SparseBloomFilter sparse = new SparseBloomFilter(shape);
+        sparse.merge(IndexExtractor.fromIndexArray(4));
+        final BloomFilterExtractor extractor = createUnderTest(one, sparse);
+        final BloomFilter<?>[] result = extractor.asBloomFilterArray(new BloomFilter<?>[0]);
+        assertEquals(2, result.length);
+        assertArrayEquals(one.asIndexArray(), result[0].asIndexArray());
+        assertArrayEquals(sparse.asIndexArray(), result[1].asIndexArray());
+        assertThrows(ArrayStoreException.class, () -> extractor.asBloomFilterArray(new String[0]));
+        assertThrows(NullPointerException.class, () -> extractor.asBloomFilterArray(null));
+    }
+
+    @Test
     public void testFlatten() {
-        final BloomFilter underTest = createUnderTest().flatten();
-        final BloomFilter expected = new SimpleBloomFilter(shape);
+        final SimpleBloomFilter underTest = createUnderTest().flatten();
+        final BloomFilter<?> expected = new SimpleBloomFilter(shape);
         expected.merge(IndexExtractor.fromIndexArray(1, 2, 3));
         assertArrayEquals(expected.asBitMapArray(), underTest.asBitMapArray());
     }
