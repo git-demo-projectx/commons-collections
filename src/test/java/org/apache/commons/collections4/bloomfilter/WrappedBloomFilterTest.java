@@ -17,41 +17,53 @@
 package org.apache.commons.collections4.bloomfilter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.util.function.Function;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilter> {
+class WrappedBloomFilterTest extends AbstractBloomFilterTest<WrappedBloomFilterTest.Fixture> {
 
-    private static class Fixture extends WrappedBloomFilter {
+    static class Fixture extends WrappedBloomFilter<Fixture> {
 
-        Fixture(final BloomFilter wrapped) {
+        Fixture(final BloomFilter<?> wrapped) {
             super(wrapped);
         }
 
         @Override
-        public WrappedBloomFilter copy() {
-            return new Fixture(getWrapped().copy());
+        public Fixture copy() {
+            return new Fixture(getWrapped(BloomFilter::copy));
         }
 
     }
 
     @Override
-    protected WrappedBloomFilter createEmptyFilter(final Shape shape) {
+    protected Fixture createEmptyFilter(final Shape shape) {
         return new Fixture(new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape));
+    }
+
+    @Test
+    void testGetWrapped() {
+        final SimpleBloomFilter inner = new SimpleBloomFilter(getTestShape());
+        final Fixture underTest = new Fixture(inner);
+        assertSame(inner, underTest.getWrapped(Function.identity()));
+        assertEquals(inner.getShape(), underTest.getWrapped(BloomFilter::getShape));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 34})
-    public void testCharacteristics(final int characteristics) {
+    void testCharacteristics(final int characteristics) {
         final Shape shape = getTestShape();
-        final BloomFilter inner = new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape) {
+        final BloomFilter<?> inner = new DefaultBloomFilterTest.SparseDefaultBloomFilter(shape) {
             @Override
             public int characteristics() {
                 return characteristics;
             }
         };
-        final WrappedBloomFilter underTest = new Fixture(inner);
+        final Fixture underTest = new Fixture(inner);
         assertEquals(characteristics, underTest.characteristics());
     }
 
